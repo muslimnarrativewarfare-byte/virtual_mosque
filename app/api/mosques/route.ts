@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { createMosque, listMosques } from "@/lib/mosques";
 
+const MAX_IMAGE_DATA_URL_LENGTH = 2_000_000;
+
+function isSafeImageDataUrl(value: string) {
+  return /^data:image\/(png|jpeg|jpg|webp|gif);base64,[A-Za-z0-9+/=\s]+$/i.test(value);
+}
+
 export async function GET() {
   try {
     const mosques = await listMosques();
@@ -30,6 +36,7 @@ export async function POST(request: NextRequest) {
         .filter(Boolean);
   const latitude = Number(body.latitude);
   const longitude = Number(body.longitude);
+  const imageDataUrl = String(body.imageDataUrl ?? "").trim();
 
   if (!name || !city || !country || !address || Number.isNaN(latitude) || Number.isNaN(longitude)) {
     return NextResponse.json(
@@ -38,19 +45,37 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  if (imageDataUrl) {
+    if (imageDataUrl.length > MAX_IMAGE_DATA_URL_LENGTH) {
+      return NextResponse.json({ message: "Image is too large. Please upload a smaller image." }, { status: 400 });
+    }
+
+    if (!isSafeImageDataUrl(imageDataUrl)) {
+      return NextResponse.json({ message: "Unsupported image format." }, { status: 400 });
+    }
+  }
+
   try {
-    const mosque = await createMosque({
+    const result = await createMosque({
       name,
       city,
       country,
       address,
       description: description || undefined,
+      imageDataUrl: imageDataUrl || undefined,
       services,
       latitude,
       longitude
     });
 
-    return NextResponse.json(mosque, { status: 201 });
+    if (!result.created) {
+      return NextResponse.json(
+        { ...result.mosque, message: "This mosque already exists. Existing listing returned." },
+        { status: 200 }
+      );
+    }
+
+    return NextResponse.json(result.mosque, { status: 201 });
   } catch (error) {
     return NextResponse.json(
       { message: error instanceof Error ? error.message : "Failed to create mosque" },
