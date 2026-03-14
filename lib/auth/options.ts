@@ -1,9 +1,9 @@
-import { Role } from '@prisma/client';
 import type { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { compare } from 'bcryptjs';
 
 import { prisma } from '../prisma';
+import { toUserRole } from './roles';
 
 export const authOptions: NextAuthOptions = {
   session: {
@@ -51,7 +51,7 @@ export const authOptions: NextAuthOptions = {
           id: user.id,
           email: user.email,
           name: user.name,
-          role: user.role ?? Role.PUBLIC,
+          role: toUserRole(user.role),
         };
       },
     }),
@@ -60,7 +60,7 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
-        token.role = (user.role as Role | undefined) ?? Role.PUBLIC;
+        token.role = toUserRole(user.role);
       }
 
       return token;
@@ -68,7 +68,7 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as string;
-        session.user.role = (token.role as Role | undefined) ?? Role.PUBLIC;
+        session.user.role = toUserRole(token.role);
       }
 
       return session;

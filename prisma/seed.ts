@@ -1,4 +1,3 @@
-import { Role } from '@prisma/client';
 import { hash } from 'bcryptjs';
 
 import { prisma } from '../lib/prisma';
@@ -17,13 +16,13 @@ async function main() {
     where: { email: process.env.SEED_PLATFORM_ADMIN_EMAIL ?? 'admin@virtualmosque.com' },
     update: {
       name: 'Platform Admin',
-      role: Role.PLATFORM_ADMIN,
+      role: 'ADMIN',
       passwordHash: adminPasswordHash,
     },
     create: {
       name: 'Platform Admin',
       email: process.env.SEED_PLATFORM_ADMIN_EMAIL ?? 'admin@virtualmosque.com',
-      role: Role.PLATFORM_ADMIN,
+      role: 'ADMIN',
       passwordHash: adminPasswordHash,
     },
   });
@@ -36,7 +35,7 @@ async function main() {
     },
     update: {
       name: 'Mosque Manager',
-      role: Role.MOSQUE_ADMIN,
+      role: 'ADMIN',
       passwordHash: mosqueManagerPasswordHash,
     },
     create: {
@@ -44,7 +43,7 @@ async function main() {
       email:
         process.env.SEED_MOSQUE_ADMIN_EMAIL ??
         'manager@virtualmosque.com',
-      role: Role.MOSQUE_ADMIN,
+      role: 'ADMIN',
       passwordHash: mosqueManagerPasswordHash,
     },
   });
