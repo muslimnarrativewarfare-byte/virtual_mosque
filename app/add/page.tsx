@@ -80,8 +80,9 @@ export default function AddMosquePage() {
         body: JSON.stringify(payload)
       });
 
+      const data = (await response.json().catch(() => null)) as { message?: string } | null;
+
       if (!response.ok) {
-        const data = (await response.json().catch(() => null)) as { message?: string } | null;
         setState({ type: "error", message: data?.message ?? "We could not submit this mosque right now." });
         return;
       }
@@ -129,24 +130,29 @@ export default function AddMosquePage() {
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
           <label className="block text-sm font-medium text-slate-700">
             Mosque name
-            <input name="name" required minLength={2} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+            <input id="name" name="name" autoComplete="organization" required minLength={2} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
           </label>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="block text-sm font-medium text-slate-700">
               City
-              <input name="city" required minLength={2} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+              <input id="city" name="city" autoComplete="address-level2" required minLength={2} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
             </label>
 
             <label className="block text-sm font-medium text-slate-700">
               Country
-              <input name="country" required minLength={2} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+              <input id="country" name="country" autoComplete="country-name" required minLength={2} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
             </label>
           </div>
 
           <label className="block text-sm font-medium text-slate-700">
             Address
-            <input name="address" required minLength={4} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+            <input id="address" name="address" autoComplete="street-address" required minLength={4} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+          </label>
+
+          <label className="block text-sm font-medium text-slate-700">
+            Mosque image (optional)
+            <input name="image" type="file" accept="image/*" onChange={handleImageUpload} className="mt-1 block w-full text-sm" />
           </label>
 
           <label className="block text-sm font-medium text-slate-700">
@@ -202,12 +208,12 @@ export default function AddMosquePage() {
 
           <label className="block text-sm font-medium text-slate-700">
             Services (comma-separated)
-            <input name="services" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+            <input id="services" name="services" autoComplete="off" className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
           </label>
 
           <label className="block text-sm font-medium text-slate-700">
             Description (optional)
-            <textarea name="description" rows={4} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+            <textarea id="description" name="description" autoComplete="off" rows={4} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
           </label>
 
           <button type="submit" disabled={isSubmitting} className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">

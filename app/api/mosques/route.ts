@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const mosque = await createMosque({
+    const result = await createMosque({
       name,
       city,
       country,
@@ -68,7 +68,14 @@ export async function POST(request: NextRequest) {
       longitude
     });
 
-    return NextResponse.json(mosque, { status: 201 });
+    if (!result.created) {
+      return NextResponse.json(
+        { ...result.mosque, message: "This mosque already exists. Existing listing returned." },
+        { status: 200 }
+      );
+    }
+
+    return NextResponse.json(result.mosque, { status: 201 });
   } catch (error) {
     return NextResponse.json(
       { message: error instanceof Error ? error.message : "Failed to create mosque" },
