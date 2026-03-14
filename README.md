@@ -45,6 +45,18 @@ Then edit `.env.local` and set at least:
 - `DATABASE_URL` — PostgreSQL connection string
 - `ADMIN_TOKEN` — secret token used by protected API routes
 
+If you connect **Vercel Upstash KV** with custom prefix `STORAGE`:
+
+- In the connect modal field shown as `STORAGE` + `_URL`, use your Upstash Redis connection string:
+  - `redis://default:<password>@<region>-<id>.upstash.io:6379`
+- Vercel then exposes these env vars (as shown in Upstash quickstart):
+  - `STORAGE_KV_REST_API_READ_ONLY_TOKEN`
+  - `STORAGE_KV_REST_API_TOKEN`
+  - `STORAGE_KV_REST_API_URL`
+  - `STORAGE_KV_URL`
+  - `STORAGE_REDIS_URL`
+- If your app expects `STORAGE_URL`, set it to the same value as `STORAGE_REDIS_URL`.
+
 > Note: `.env.example` currently includes `NEXTAUTH_*` variables; this app’s auth guard uses `ADMIN_TOKEN` for API/admin authorization.
 
 ### 4) Apply Prisma migrations
@@ -82,6 +94,8 @@ Set these environment variables in your hosting provider:
 - `DATABASE_URL`
 - `ADMIN_TOKEN`
 - `NEXT_PUBLIC_APP_URL` (optional)
+- `STORAGE_REDIS_URL` (or `STORAGE_URL` alias with the same Redis value)
+- `STORAGE_KV_REST_API_URL`, `STORAGE_KV_REST_API_TOKEN`
 
 Deployment checklist:
 
