@@ -7,24 +7,16 @@ type SubmissionState = {
   message: string;
 };
 
-type ApiErrorPayload = {
-  message?: string;
-  error?: {
-    message?: string;
-  };
-};
-
 export default function AddMosquePage() {
   const [state, setState] = useState<SubmissionState>({ type: "idle", message: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const formElement = event.currentTarget;
     setIsSubmitting(true);
     setState({ type: "idle", message: "" });
 
-    const form = new FormData(formElement);
+    const form = new FormData(event.currentTarget);
     const payload = {
       name: String(form.get("name") ?? ""),
       city: String(form.get("city") ?? ""),
@@ -44,17 +36,15 @@ export default function AddMosquePage() {
       });
 
       if (!response.ok) {
-        const data = (await response.json().catch(() => null)) as ApiErrorPayload | null;
-        const message = data?.error?.message ?? data?.message ?? "We could not submit this mosque right now.";
-
+        const data = (await response.json().catch(() => null)) as { message?: string } | null;
         setState({
           type: "error",
-          message,
+          message: data?.message ?? "We could not submit this mosque right now.",
         });
         return;
       }
 
-      formElement.reset();
+      event.currentTarget.reset();
       setState({ type: "success", message: "Mosque submitted successfully for review." });
     } catch {
       setState({ type: "error", message: "Network error. Please try again." });
