@@ -1,52 +1,60 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-import { requireAuth } from "@/lib/api/auth";
-import { errorResponse, successResponse } from "@/lib/api/errors";
-import { mosqueCreateSchema } from "@/lib/api/schemas";
-import { parseAndValidate } from "@/lib/api/validation";
-import { prisma } from "@/lib/prisma";
+import { createMosque, listMosques } from "@/lib/mosques";
 
 export async function GET() {
-  const mosques = await prisma.mosque.findMany({
-    where: { status: "APPROVED" },
-    orderBy: { createdAt: "desc" },
-  });
-
-  return successResponse(mosques);
+  try {
+    const mosques = await listMosques();
+    return NextResponse.json(mosques);
+  } catch (error) {
+    return NextResponse.json(
+      { message: error instanceof Error ? error.message : "Failed to fetch mosques" },
+      { status: 500 }
+    );
+  }
 }
 
 export async function POST(request: NextRequest) {
-  const authResult = requireAuth(request);
-  if (!authResult.ok) {
-    return authResult.response;
-  }
+  const body = (await request.json()) as Record<string, unknown>;
 
-  const payloadResult = await parseAndValidate(request, mosqueCreateSchema);
-  if (!payloadResult.ok) {
-    return payloadResult.response;
+  const name = String(body.name ?? "").trim();
+  const city = String(body.city ?? "").trim();
+  const country = String(body.country ?? "").trim();
+  const address = String(body.address ?? "").trim();
+  const description = String(body.description ?? "").trim();
+  const services = Array.isArray(body.services)
+    ? body.services.map((service) => String(service).trim()).filter(Boolean)
+    : String(body.services ?? "")
+        .split(",")
+        .map((service) => service.trim())
+        .filter(Boolean);
+  const latitude = Number(body.latitude);
+  const longitude = Number(body.longitude);
+
+  if (!name || !city || !country || !address || Number.isNaN(latitude) || Number.isNaN(longitude)) {
+    return NextResponse.json(
+      { message: "name, city, country, address, latitude and longitude are required." },
+      { status: 400 }
+    );
   }
 
   try {
-    await prisma.user.upsert({
-      where: { id: authResult.user.id },
-      update: { role: authResult.user.role },
-      create: {
-        id: authResult.user.id,
-        role: authResult.user.role,
-        email: `${authResult.user.id}@virtual-mosque.local`,
-      },
+    const mosque = await createMosque({
+      name,
+      city,
+      country,
+      address,
+      description: description || undefined,
+      services,
+      latitude,
+      longitude
     });
 
-    const mosque = await prisma.mosque.create({
-      data: {
-        ...payloadResult.data,
-        ownerId: authResult.user.id,
-        status: authResult.user.role === "ADMIN" ? "APPROVED" : "PENDING",
-      },
-    });
-
-    return successResponse(mosque, 201);
-  } catch {
-    return errorResponse("INTERNAL_SERVER_ERROR", "Failed to create mosque", 500);
+    return NextResponse.json(mosque, { status: 201 });
+  } catch (error) {
+    return NextResponse.json(
+      { message: error instanceof Error ? error.message : "Failed to create mosque" },
+      { status: 500 }
+    );
   }
 }
