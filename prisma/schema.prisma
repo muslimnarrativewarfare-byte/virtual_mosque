@@ -1,0 +1,57 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+
+  mosques   Mosque[]
+}
+
+model Mosque {
+  id           String         @id @default(cuid())
+  name         String
+  city         String
+  address      String
+  imam         String
+  phone        String
+  latitude     Float
+  longitude    Float
+  description  String
+  images       String[]
+  createdBy    String
+  createdAt    DateTime       @default(now())
+
+  creator      User           @relation(fields: [createdBy], references: [id])
+  announcements Announcement[]
+
+  @@index([city])
+  @@index([createdBy])
+}
+
+model Announcement {
+  id        String   @id @default(cuid())
+  mosqueId  String
+  title     String
+  content   String
+  createdAt DateTime @default(now())
+
+  mosque    Mosque   @relation(fields: [mosqueId], references: [id])
+
+  @@index([mosqueId])
+}
