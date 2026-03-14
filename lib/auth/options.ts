@@ -4,6 +4,7 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 import { compare } from 'bcryptjs';
 
 import { prisma } from '../prisma';
+import { toUserRole } from './roles';
 
 export const authOptions: NextAuthOptions = {
   session: {
