@@ -1,4 +1,4 @@
-import type { UserRole } from './roles';
+import type { UserRole } from '@prisma/client';
 import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
 

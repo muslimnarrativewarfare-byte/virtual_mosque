@@ -1,16 +1,16 @@
 import { NextResponse } from 'next/server';
 import { withAuth } from 'next-auth/middleware';
 
-import { ADMIN_ROLE, type UserRole } from './lib/auth/roles';
+type UserRole = 'USER' | 'ADMIN';
 
-const DASHBOARD_ALLOWED_ROLES: UserRole[] = [ADMIN_ROLE];
+const DASHBOARD_ALLOWED_ROLES: UserRole[] = ['ADMIN'];
 
 export default withAuth(
   function middleware(req) {
     const tokenRole = req.nextauth.token?.role as UserRole | undefined;
     const { pathname } = req.nextUrl;
 
-    if (pathname.startsWith('/admin') && tokenRole !== ADMIN_ROLE) {
+    if (pathname.startsWith('/admin') && tokenRole !== 'ADMIN') {
       return NextResponse.redirect(new URL('/unauthorized', req.url));
     }
 
