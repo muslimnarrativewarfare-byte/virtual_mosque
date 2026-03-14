@@ -1,72 +1,33 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-import { requireAuth } from "@/lib/api/auth";
-import { errorResponse, successResponse } from "@/lib/api/errors";
-import { mosqueUpdateSchema } from "@/lib/api/schemas";
-import { parseAndValidate } from "@/lib/api/validation";
-import { prisma } from "@/lib/prisma";
+import { deleteMosque, getMosque } from "@/lib/mosques";
 
 type Params = { params: { id: string } };
 
 export async function GET(_: NextRequest, { params }: Params) {
-  const mosque = await prisma.mosque.findUnique({ where: { id: params.id } });
+  try {
+    const mosque = await getMosque(params.id);
+    if (!mosque) {
+      return NextResponse.json({ message: "Mosque not found" }, { status: 404 });
+    }
 
-  if (!mosque || mosque.status !== "APPROVED") {
-    return errorResponse("NOT_FOUND", "Mosque not found", 404);
+    return NextResponse.json(mosque);
+  } catch (error) {
+    return NextResponse.json(
+      { message: error instanceof Error ? error.message : "Failed to fetch mosque" },
+      { status: 500 }
+    );
   }
-
-  return successResponse(mosque);
 }
 
-export async function PUT(request: NextRequest, { params }: Params) {
-  const authResult = requireAuth(request);
-  if (!authResult.ok) {
-    return authResult.response;
+export async function DELETE(_: NextRequest, { params }: Params) {
+  try {
+    await deleteMosque(params.id);
+    return NextResponse.json({ id: params.id, deleted: true });
+  } catch (error) {
+    return NextResponse.json(
+      { message: error instanceof Error ? error.message : "Failed to delete mosque" },
+      { status: 500 }
+    );
   }
-
-  const existing = await prisma.mosque.findUnique({ where: { id: params.id } });
-  if (!existing) {
-    return errorResponse("NOT_FOUND", "Mosque not found", 404);
-  }
-
-  const canEdit = authResult.user.role === "ADMIN" || existing.ownerId === authResult.user.id;
-  if (!canEdit) {
-    return errorResponse("FORBIDDEN", "You are not allowed to edit this mosque", 403);
-  }
-
-  const payloadResult = await parseAndValidate(request, mosqueUpdateSchema);
-  if (!payloadResult.ok) {
-    return payloadResult.response;
-  }
-
-  const mosque = await prisma.mosque.update({
-    where: { id: params.id },
-    data: {
-      ...payloadResult.data,
-      status: authResult.user.role === "ADMIN" ? existing.status : "PENDING",
-    },
-  });
-
-  return successResponse(mosque);
-}
-
-export async function DELETE(request: NextRequest, { params }: Params) {
-  const authResult = requireAuth(request);
-  if (!authResult.ok) {
-    return authResult.response;
-  }
-
-  const existing = await prisma.mosque.findUnique({ where: { id: params.id } });
-  if (!existing) {
-    return errorResponse("NOT_FOUND", "Mosque not found", 404);
-  }
-
-  const canDelete = authResult.user.role === "ADMIN" || existing.ownerId === authResult.user.id;
-  if (!canDelete) {
-    return errorResponse("FORBIDDEN", "You are not allowed to delete this mosque", 403);
-  }
-
-  await prisma.mosque.delete({ where: { id: params.id } });
-
-  return successResponse({ id: params.id, deleted: true });
 }
