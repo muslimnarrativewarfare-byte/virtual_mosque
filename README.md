@@ -1,130 +1,90 @@
 # Virtual Mosque
 
-Mobile-first web experience for discovering mosques, viewing announcements, and managing directory operations.
+Virtual Mosque is a Next.js web app for discovering mosques, viewing announcements, and managing mosque data through protected API routes.
 
-## User-facing flows
+## Features
 
-- Home page (`/`) with quick navigation cards.
-- Mosque directory (`/mosques`) with search and city filtering.
-- Mosque details (`/mosques/[id]`) with services and announcements.
-- Map explorer (`/map`) powered by Leaflet with client-only dynamic import.
-- Add mosque form (`/add`) posting to API.
-- Mosque dashboard (`/dashboard`) for operational stats.
-- Admin panel (`/admin`) with auth-guarded management view.
+- Browse mosques with search/filter support.
+- View mosque details and announcements.
+- Explore mosque locations on an interactive Leaflet map.
+- Submit mosque entries via form flow.
+- Admin-protected API routes for create/update/delete and moderation.
 
-## Reusable components
+## Tech stack
 
-- `MosqueCard`
-- `SearchFilters`
-- `MapView` + `MapViewClient` (Leaflet)
-- `AnnouncementList`
-- Form controls (`LabeledInput`, `LabeledTextarea`)
+- Next.js (App Router)
+- React + TypeScript
+- Prisma ORM
+- Tailwind CSS
+- Vitest + Testing Library
 
-## API baseline
+## Run locally
 
-- `GET /api/mosques`
-- `POST /api/mosques` (admin token required)
-- `PATCH /api/mosques/:id` (admin token required)
-- `DELETE /api/mosques/:id` (admin token required)
+### 1) Prerequisites
 
-Header used for privileged routes: `x-admin-token: <ADMIN_TOKEN>`.
+- Node.js 18.17+ (Node.js 20+ recommended)
+- npm 9+
+- A PostgreSQL database
 
-## Testing baseline
-
-- API route tests for CRUD/auth failure behaviors.
-- Prisma interaction tests for repository calls.
-- UI auth-guard test coverage for admin page behavior.
-
-Run tests:
+### 2) Install dependencies
 
 ```bash
-npm test
+npm install
 ```
 
-## Production readiness
+### 3) Configure environment variables
 
-### Vercel environment variables
-
-Set these in Vercel project settings:
-
-- `DATABASE_URL` (Postgres connection string)
-- `ADMIN_TOKEN` (shared secret for API/admin access)
-- `NEXT_PUBLIC_APP_URL` (optional, canonical URL)
-
-### Postgres provisioning checklist
-
-1. Create a managed Postgres instance (Neon, Supabase, RDS, or equivalent).
-2. Enable TLS and enforce strong password policy.
-3. Create app database/user with least privileges.
-4. Add the final connection string to `DATABASE_URL`.
-
-### Prisma migration/deploy commands
+Copy the example env file:
 
 ```bash
-npx prisma generate
-npx prisma migrate deploy
-npx prisma db seed   # optional if seed script is configured
+cp .env.example .env.local
 ```
 
-For local development:
+Then edit `.env.local` and set at least:
+
+- `DATABASE_URL` — PostgreSQL connection string
+- `ADMIN_TOKEN` — secret token used by protected API routes
+
+> Note: `.env.example` currently includes `NEXTAUTH_*` variables; this app’s auth guard uses `ADMIN_TOKEN` for API/admin authorization.
+
+### 4) Apply Prisma migrations
 
 ```bash
 npx prisma migrate dev
 ```
 
-### Build/start commands
+(Optional) generate Prisma client explicitly:
 
 ```bash
-npm install
-npm run build
-npm run start
+npx prisma generate
 ```
 
-### Rollout checklist
-
-1. Confirm Vercel env vars are set for preview + production.
-2. Run `prisma migrate deploy` against production database.
-3. Verify health by calling `GET /api/mosques`.
-4. Smoke test key flows on mobile viewport:
-   - directory search/filter
-   - map explorer
-   - add mosque form
-   - admin auth guard
-5. Monitor Vercel logs and DB metrics for first 24 hours.
-This repository contains a baseline [Next.js](https://nextjs.org/) project using the App Router, strict TypeScript, and Tailwind CSS.
-
-## Prerequisites
-
-- Node.js 18.17+ (or Node.js 20+)
-- npm 9+
-
-## Setup
-
-1. Install dependencies:
-
-   ```bash
-   npm install
-   ```
-
-2. Copy environment variables:
-
-   ```bash
-   cp .env.example .env.local
-   ```
-
-3. Update `.env.local` with your actual values.
-
-## Run locally
+### 5) Start the development server
 
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+Open http://localhost:3000
 
-## Available scripts
+## Useful scripts
 
-- `npm run dev` - start development server
-- `npm run build` - create production build
-- `npm run start` - start production server
-- `npm run lint` - run Next.js ESLint checks
+- `npm run dev` — start local development server
+- `npm run build` — create production build
+- `npm run start` — run production build
+- `npm run lint` — run lint checks
+- `npm test` — run test suite
+
+## Production notes
+
+Set these environment variables in your hosting provider:
+
+- `DATABASE_URL`
+- `ADMIN_TOKEN`
+- `NEXT_PUBLIC_APP_URL` (optional)
+
+Deployment checklist:
+
+1. Run `npx prisma migrate deploy` on production DB.
+2. Deploy app.
+3. Verify `GET /api/mosques` and admin-protected endpoints.
