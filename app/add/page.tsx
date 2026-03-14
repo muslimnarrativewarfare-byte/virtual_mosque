@@ -41,8 +41,8 @@ export default function AddMosquePage() {
         .split(",")
         .map((entry) => entry.trim())
         .filter(Boolean),
-      latitude: Number(latitude),
-      longitude: Number(longitude)
+      latitude: Number(form.get("latitude")),
+      longitude: Number(form.get("longitude"))
     };
 
     try {
@@ -59,8 +59,6 @@ export default function AddMosquePage() {
       }
 
       event.currentTarget.reset();
-      setLatitude(String(DEFAULT_LAT));
-      setLongitude(String(DEFAULT_LNG));
       setState({ type: "success", message: "Mosque submitted successfully." });
     } catch {
       setState({ type: "error", message: "Network error. Please try again." });
@@ -95,7 +93,7 @@ export default function AddMosquePage() {
       <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
         <h1 className="text-3xl font-bold tracking-tight text-slate-900">Add a mosque</h1>
         <p className="mt-2 text-sm leading-6 text-slate-600">
-          Pick the location from the map (or your current location), then submit mosque details.
+          Version 1 keeps this simple: submit mosque details and coordinates to publish instantly.
         </p>
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
@@ -121,45 +119,15 @@ export default function AddMosquePage() {
             <input name="address" required minLength={4} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
           </label>
 
-          <DynamicLocationPicker
-            latitude={Number.isNaN(parsedLatitude) ? DEFAULT_LAT : parsedLatitude}
-            longitude={Number.isNaN(parsedLongitude) ? DEFAULT_LNG : parsedLongitude}
-            onSelect={selectFromMap}
-          />
-
-          <button
-            type="button"
-            onClick={useCurrentLocation}
-            className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700"
-          >
-            Use my current location
-          </button>
-
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="block text-sm font-medium text-slate-700">
               Latitude
-              <input
-                name="latitude"
-                type="number"
-                step="any"
-                required
-                value={latitude}
-                onChange={(event) => setLatitude(event.target.value)}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-              />
+              <input name="latitude" type="number" step="any" required className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
             </label>
 
             <label className="block text-sm font-medium text-slate-700">
               Longitude
-              <input
-                name="longitude"
-                type="number"
-                step="any"
-                required
-                value={longitude}
-                onChange={(event) => setLongitude(event.target.value)}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-              />
+              <input name="longitude" type="number" step="any" required className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
             </label>
           </div>
 
