@@ -16,6 +16,11 @@ const quickLinks = [
     title: "Admin review",
     description: "Moderate submissions and manage records.",
   },
+  {
+    href: "/add",
+    title: "Add a mosque",
+    description: "Submit a new mosque profile for review.",
+  },
 ];
 
 export default function Home() {
@@ -36,6 +41,12 @@ export default function Home() {
             className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-700"
           >
             Open mosque directory
+          </Link>
+          <Link
+            href="/add"
+            className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-400"
+          >
+            Add a mosque
           </Link>
           <Link
             href="/map"
