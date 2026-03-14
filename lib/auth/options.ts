@@ -1,4 +1,3 @@
-import { PrismaAdapter } from '@auth/prisma-adapter';
 import { Role } from '@prisma/client';
 import type { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
@@ -7,7 +6,6 @@ import { compare } from 'bcryptjs';
 import { prisma } from '../prisma';
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
   session: {
     strategy: 'jwt',
   },
@@ -23,11 +21,20 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
+        const normalizedEmail = credentials.email.trim().toLowerCase();
+
         const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
+          where: { email: normalizedEmail },
+          select: {
+            id: true,
+            email: true,
+            name: true,
+            role: true,
+            passwordHash: true,
+          },
         });
 
-        if (!user || !user.passwordHash) {
+        if (!user?.passwordHash) {
           return null;
         }
 
@@ -44,7 +51,7 @@ export const authOptions: NextAuthOptions = {
           id: user.id,
           email: user.email,
           name: user.name,
-          role: user.role,
+          role: user.role ?? Role.PUBLIC,
         };
       },
     }),
