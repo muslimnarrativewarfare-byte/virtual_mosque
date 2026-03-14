@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -29,6 +30,16 @@ export default async function MosqueDetailsPage({ params }: Props) {
         <p className="mt-2 text-slate-700">
           {mosque.address}, {mosque.city}, {mosque.country}
         </p>
+        {mosque.imageDataUrl ? (
+          <Image
+            src={mosque.imageDataUrl}
+            alt={mosque.name}
+            width={1400}
+            height={700}
+            unoptimized
+            className="mt-6 h-72 w-full rounded-xl border border-slate-200 object-cover"
+          />
+        ) : null}
         {mosque.description ? <p className="mt-4 text-sm leading-6 text-slate-700">{mosque.description}</p> : null}
 
         <section className="mt-6">
