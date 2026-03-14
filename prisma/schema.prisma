@@ -7,51 +7,61 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Role {
+enum UserRole {
   USER
   ADMIN
 }
 
-model User {
-  id        String   @id @default(cuid())
-  name      String
-  email     String   @unique
-  password  String
-  role      Role     @default(USER)
-  createdAt DateTime @default(now())
+enum MosqueStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
 
-  mosques   Mosque[]
+model User {
+  id              String         @id @default(cuid())
+  email           String         @unique
+  role            UserRole       @default(USER)
+  mosques         Mosque[]       @relation("MosqueOwner")
+  announcements   Announcement[] @relation("AnnouncementAuthor")
+  moderatedMosque Mosque[]       @relation("MosqueModerator")
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
 }
 
 model Mosque {
-  id           String         @id @default(cuid())
-  name         String
-  city         String
-  address      String
-  imam         String
-  phone        String
-  latitude     Float
-  longitude    Float
-  description  String
-  images       String[]
-  createdBy    String
-  createdAt    DateTime       @default(now())
+  id               String         @id @default(cuid())
+  name             String
+  city             String
+  country          String
+  description      String?
+  ownerId          String
+  owner            User           @relation("MosqueOwner", fields: [ownerId], references: [id])
+  status           MosqueStatus   @default(PENDING)
+  moderationReason String?
+  moderatedBy      String?
+  moderator        User?          @relation("MosqueModerator", fields: [moderatedBy], references: [id])
+  moderatedAt      DateTime?
+  announcements    Announcement[]
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
 
-  creator      User           @relation(fields: [createdBy], references: [id])
-  announcements Announcement[]
-
-  @@index([city])
-  @@index([createdBy])
+  @@index([status])
+  @@index([ownerId])
 }
 
 model Announcement {
-  id        String   @id @default(cuid())
-  mosqueId  String
-  title     String
-  content   String
-  createdAt DateTime @default(now())
-
-  mosque    Mosque   @relation(fields: [mosqueId], references: [id])
+  id          String   @id @default(cuid())
+  mosqueId    String
+  mosque      Mosque   @relation(fields: [mosqueId], references: [id], onDelete: Cascade)
+  authorId    String
+  author      User     @relation("AnnouncementAuthor", fields: [authorId], references: [id])
+  title       String
+  content     String
+  publishedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@index([mosqueId])
+  @@index([authorId])
 }
