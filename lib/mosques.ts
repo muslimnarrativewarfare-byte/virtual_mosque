@@ -9,6 +9,7 @@ export type MosqueRecord = {
   country: string;
   address: string;
   description?: string;
+  imageDataUrl?: string;
   services: string[];
   latitude: number;
   longitude: number;
