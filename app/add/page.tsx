@@ -92,10 +92,7 @@ export default function AddMosquePage() {
       setLongitude(String(DEFAULT_LNG));
       setImageDataUrl("");
       setImagePreview("");
-      setState({
-        type: "success",
-        message: response.status === 200 ? data?.message ?? "Mosque already exists." : "Mosque submitted successfully."
-      });
+      setState({ type: "success", message: "Mosque submitted successfully." });
     } catch {
       setState({ type: "error", message: "Network error. Please try again." });
     } finally {
@@ -151,6 +148,11 @@ export default function AddMosquePage() {
           <label className="block text-sm font-medium text-slate-700">
             Address
             <input id="address" name="address" autoComplete="street-address" required minLength={4} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+          </label>
+
+          <label className="block text-sm font-medium text-slate-700">
+            Mosque image (optional)
+            <input name="image" type="file" accept="image/*" onChange={handleImageUpload} className="mt-1 block w-full text-sm" />
           </label>
 
           <label className="block text-sm font-medium text-slate-700">

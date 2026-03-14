@@ -57,23 +57,17 @@ export default function MosqueListClient({ initialMosques }: Props) {
         </section>
       ) : (
         <section className="mt-8 grid gap-5 sm:grid-cols-2">
-          {mosques.map((mosque) => {
-            const displayName = mosque.name?.trim() || "Unnamed mosque";
-            const displayCity = mosque.city?.trim() || "Unknown city";
-            const displayCountry = mosque.country?.trim() || "Unknown country";
-            const displayAddress = mosque.address?.trim() || "Address not provided";
-
-            return (
+          {mosques.map((mosque) => (
             <article key={mosque.id} className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
               {mosque.imageDataUrl ? (
-                <Image src={mosque.imageDataUrl} alt={displayName} width={1200} height={480} unoptimized className="h-44 w-full object-cover" />
+                <Image src={mosque.imageDataUrl} alt={mosque.name} width={1200} height={480} unoptimized className="h-44 w-full object-cover" />
               ) : null}
               <div className="p-5">
-                <h2 className="text-xl font-semibold text-slate-900">{displayName}</h2>
+                <h2 className="text-xl font-semibold text-slate-900">{mosque.name}</h2>
                 <p className="mt-1 text-sm text-slate-600">
-                  {displayCity}, {displayCountry}
+                  {mosque.city}, {mosque.country}
                 </p>
-                <p className="mt-1 text-sm text-slate-600">{displayAddress}</p>
+                <p className="mt-1 text-sm text-slate-600">{mosque.address}</p>
                 <div className="mt-4 flex flex-wrap gap-2">
                   <Link href={`/mosques/${mosque.id}`} className="rounded-md border border-slate-300 px-3 py-1 text-sm font-medium text-slate-700">
                     Details
@@ -97,8 +91,7 @@ export default function MosqueListClient({ initialMosques }: Props) {
                 </div>
               </div>
             </article>
-          );
-          })}
+          ))}
         </section>
       )}
     </>
