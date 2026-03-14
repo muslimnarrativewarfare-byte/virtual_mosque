@@ -1,4 +1,4 @@
-import { Role } from '@prisma/client';
+import type { UserRole } from '@prisma/client';
 import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
 
@@ -18,7 +18,7 @@ export async function requireAuth() {
   return session;
 }
 
-export async function requireRole(role: Role) {
+export async function requireRole(role: UserRole) {
   const session = await requireAuth();
 
   if (session.user.role !== role) {
@@ -28,7 +28,7 @@ export async function requireRole(role: Role) {
   return session;
 }
 
-export async function requireAnyRole(roles: Role[]) {
+export async function requireAnyRole(roles: UserRole[]) {
   const session = await requireAuth();
 
   if (!roles.includes(session.user.role)) {
