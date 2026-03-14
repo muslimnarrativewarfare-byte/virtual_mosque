@@ -1,15 +1,29 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import dynamic from "next/dynamic";
+import { FormEvent, useMemo, useState } from "react";
+
+const DynamicLocationPicker = dynamic(() => import("./location-picker"), {
+  ssr: false,
+  loading: () => <p className="text-sm text-slate-500">Loading map picker…</p>
+});
 
 type SubmissionState = {
   type: "idle" | "success" | "error";
   message: string;
 };
 
+const DEFAULT_LAT = 24.8607;
+const DEFAULT_LNG = 67.0011;
+
 export default function AddMosquePage() {
   const [state, setState] = useState<SubmissionState>({ type: "idle", message: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [latitude, setLatitude] = useState<string>(String(DEFAULT_LAT));
+  const [longitude, setLongitude] = useState<string>(String(DEFAULT_LNG));
+
+  const parsedLatitude = useMemo(() => Number(latitude), [latitude]);
+  const parsedLongitude = useMemo(() => Number(longitude), [longitude]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -51,6 +65,27 @@ export default function AddMosquePage() {
     } finally {
       setIsSubmitting(false);
     }
+  }
+
+  function selectFromMap(lat: number, lng: number) {
+    setLatitude(String(lat));
+    setLongitude(String(lng));
+  }
+
+  function useCurrentLocation() {
+    if (!navigator.geolocation) {
+      setState({ type: "error", message: "Geolocation is not supported by this browser." });
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setLatitude(String(Number(position.coords.latitude.toFixed(6))));
+        setLongitude(String(Number(position.coords.longitude.toFixed(6))));
+        setState({ type: "idle", message: "" });
+      },
+      () => setState({ type: "error", message: "Unable to access your location." })
+    );
   }
 
   return (
