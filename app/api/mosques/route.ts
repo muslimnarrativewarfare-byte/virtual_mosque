@@ -27,6 +27,16 @@ export async function POST(request: NextRequest) {
   }
 
   try {
+    await prisma.user.upsert({
+      where: { id: authResult.user.id },
+      update: { role: authResult.user.role },
+      create: {
+        id: authResult.user.id,
+        role: authResult.user.role,
+        email: `${authResult.user.id}@virtual-mosque.local`,
+      },
+    });
+
     const mosque = await prisma.mosque.create({
       data: {
         ...payloadResult.data,
